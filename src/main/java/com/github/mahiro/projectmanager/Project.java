@@ -2,6 +2,7 @@ package com.github.mahiro.projectmanager;
 
 import java.sql.Timestamp;
 
+//プライベートフィールド(カプセル化)
 public class Project {
     private Integer id;
     private String title;
