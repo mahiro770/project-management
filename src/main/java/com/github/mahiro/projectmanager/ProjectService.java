@@ -93,4 +93,22 @@ public class ProjectService {
     
     System.out.println("更新が完了しました！");
 }
+
+// ProjectService.java に追加
+public void deleteProject(int id) {
+    // 存在チェック
+    Project project = repo.findById(id);
+    if (project == null) {
+        System.out.println("指定された案件（ID: " + id + "）は見つかりませんでした。");
+        System.out.println("一覧表示でIDを確認してください。");
+        return;
+    }
+
+    // 削除実行
+    if (repo.delete(id)) {
+        System.out.println("削除が完了しました。");
+    } else {
+        System.out.println("削除中にエラーが発生しました。");
+    }
+}
 }

@@ -189,7 +189,7 @@ public class Main {
                         }
                         break;
 
-                    // Main.java の case 5
+                    // 削除処理
                     case 5:
                         System.out.println("削除処理を開始します...");
                         System.out.print("削除する案件番号を入力してください(戻る場合は-1): ");
