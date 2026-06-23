@@ -23,7 +23,13 @@ public class Main {
         boolean running = true;
         System.out.println("案件配信ツールです。実行したい項目を番号で選んでください。");
         while (running) {
-            System.out.println("1:案件一覧表示  2:案件詳細表示  3:案件登録  4:案件更新  5:案件削除");
+            System.out.println("\n==========操作方法============");
+            System.out.println("1:案件一覧表示");
+            System.out.println("2:案件詳細表示");
+            System.out.println("3:案件登録");
+            System.out.println("4:案件更新");
+            System.out.println("5:案件削除");
+            System.out.println("\n==============================");
             System.out.print("操作番号:");
 
             int number = scan.nextInt();
@@ -54,6 +60,7 @@ public class Main {
                         System.out.print(p.toString());
                         System.out.println();
                     }
+                    System.out.println("詳細一覧表示を開始します");
                     System.out.println("詳細を表示したい案件番号を入力してください");
                     System.out.print("番号:");
                     int select_id = scan.nextInt();
@@ -64,6 +71,7 @@ public class Main {
 
                 // 案件登録
                 case 3:
+                    System.out.println("案件登録を開始します");
                     System.out.println("タイトルを入力してください(必須)");
                     String title = scan.nextLine();
                     System.out.println(title);
@@ -98,7 +106,7 @@ public class Main {
 
                 // 案件更新
                 case 4:
-                    System.out.println("更新処理を開始します...");
+                    System.out.println("更新処理を開始します");
 
                     List<Project> projects = repo.findAll();
 
@@ -122,13 +130,15 @@ public class Main {
                     boolean updatePriceMax = false;
                     boolean updateStatus = false;
                     
-
+                    System.out.println("==========案件一覧===========");
                     Project project = repo.findById(change_id);
+                    System.out.println("============================");
+                    System.out.println();
 
                     if (project == null) {
                         System.out.println("指定されたIDは見つかりませんでした");
                         break;
-                    }     
+                    }   
                         System.out.print("案件名を変更してください（変更しない場合はEnter) : ");
                         String newTitle = scan.nextLine();
 
@@ -207,6 +217,30 @@ public class Main {
 
                 case 5:
                     System.out.println("削除処理を開始します...");
+                    System.out.println("削除する案件番号を入力してください");
+                    System.out.print("番号:");
+                    int delete_id = scan.nextInt();
+                    scan.nextLine();
+
+                    System.out.println("本当に案件" + delete_id + "を削除してもいいですか？（Y/N)");
+                    String judge = scan.nextLine();
+
+                    if("Y".equals(judge) || "y".equals(judge)){
+                        if(repo.delete(delete_id)){
+                            System.out.println("削除が完了しました");
+                        }else{
+                            System.out.println("指定された案件は見つかりませんでした");
+                            System.out.println("1案件一覧 か 2案件詳細表示で確認してください");
+                        }
+                    }else if("N".equals(judge) || "n".equals(judge)){
+                        System.out.println("削除をキャンセルしました");
+                    }else{
+                        System.out.println("無効な入力です。再度入力してください");
+                    }
+
+                    
+                    break;
+                    
             }
 
         }

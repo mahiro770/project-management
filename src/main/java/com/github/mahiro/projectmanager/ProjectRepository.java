@@ -12,7 +12,7 @@ import java.util.Scanner;
 public class ProjectRepository {
     Scanner scan = new Scanner(System.in);
 
-    //案件一覧表示
+    // 案件一覧表示
     public List<Project> findAll() {
         List<Project> list = new ArrayList<Project>();
         String sql = "SELECT * FROM projects ORDER BY id";
@@ -21,7 +21,6 @@ public class ProjectRepository {
                 PreparedStatement stm = conn.prepareStatement(sql);
                 ResultSet rs = stm.executeQuery()) {
 
-            
             while (rs.next()) {
                 Integer id = rs.getInt("id");
                 String title = rs.getString("title");
@@ -47,8 +46,8 @@ public class ProjectRepository {
         return list;
     }
 
-    //案件詳細表示
-     public void showDetail(int select_id) {
+    // 案件詳細表示
+    public void showDetail(int select_id) {
 
         String sql = "SELECT * FROM projects WHERE id = ?";
 
@@ -78,7 +77,7 @@ public class ProjectRepository {
         }
     }
 
-    //案件登録
+    // 案件登録
     public void insert(Project project) {
         String sql = "INSERT INTO projects (title,client_name,required_skill,location,price_min,price_max) VALUES(?,?,?,?,?,?)";
 
@@ -114,103 +113,120 @@ public class ProjectRepository {
 
     }
 
-    
-    //案件更新
-    public void update(Project project, boolean updateTitle, boolean updateClient_name, boolean updateRequired_skill, boolean updateLocation, boolean updatePrice_min, boolean updatePrice_max,boolean updateStatus){
+    // 案件更新
+    public void update(Project project, boolean updateTitle, boolean updateClient_name, boolean updateRequired_skill,
+            boolean updateLocation, boolean updatePrice_min, boolean updatePrice_max, boolean updateStatus) {
 
-     List<String> setClauses = new ArrayList<>();
-     List<Object> values = new ArrayList<>();
+        List<String> setClauses = new ArrayList<>();
+        List<Object> values = new ArrayList<>();
 
-     if(updateTitle){
-        setClauses.add("title = ?");
-        values.add(project.getTitle());
-     }
-     if(updateClient_name){
-        setClauses.add("client_name = ?");
-        values.add(project.getClientName());
-     }
-     if(updateRequired_skill){
-        setClauses.add("required_skill = ?");
-        values.add(project.getRequiredSkills());
-     }
-     if(updateLocation){
-        setClauses.add("location = ?");
-        values.add(project.getLocation());
-     }
-     if(updatePrice_min){
-        setClauses.add("price_min = ?");
-        values.add(project.getPriceMin());
-     }
-     if(updatePrice_max){
-        setClauses.add("price_max = ?");
-        values.add(project.getPriceMax());
-     }
-     if(updateStatus){
-        setClauses.add("status = ?");
-        values.add(project.getStatus());
-     }
-     
-    setClauses.add("updated_at = ?");
-    values.add(project.getUpdatedAt());
-     
+        if (updateTitle) {
+            setClauses.add("title = ?");
+            values.add(project.getTitle());
+        }
+        if (updateClient_name) {
+            setClauses.add("client_name = ?");
+            values.add(project.getClientName());
+        }
+        if (updateRequired_skill) {
+            setClauses.add("required_skill = ?");
+            values.add(project.getRequiredSkills());
+        }
+        if (updateLocation) {
+            setClauses.add("location = ?");
+            values.add(project.getLocation());
+        }
+        if (updatePrice_min) {
+            setClauses.add("price_min = ?");
+            values.add(project.getPriceMin());
+        }
+        if (updatePrice_max) {
+            setClauses.add("price_max = ?");
+            values.add(project.getPriceMax());
+        }
+        if (updateStatus) {
+            setClauses.add("status = ?");
+            values.add(project.getStatus());
+        }
 
-    if(setClauses.isEmpty()){
-        System.out.println("更新対象が選択されていません");
-        return;
-    }
+        setClauses.add("updated_at = ?");
+        values.add(project.getUpdatedAt());
 
-    String sql = "UPDATE projects SET " 
-              + String.join(",", setClauses) 
-              + " WHERE id = ?";
-    values.add(project.getId());
+        if (setClauses.isEmpty()) {
+            System.out.println("更新対象が選択されていません");
+            return;
+        }
 
-    try(Connection conn = Database.getConnection();
-        PreparedStatement stm = conn.prepareStatement(sql)){
+        String sql = "UPDATE projects SET "
+                + String.join(",", setClauses)
+                + " WHERE id = ?";
+        values.add(project.getId());
 
-            for(int i = 0; i < values.size(); i++){
-                stm.setObject(i + 1,values.get(i));
+        try (Connection conn = Database.getConnection();
+                PreparedStatement stm = conn.prepareStatement(sql)) {
+
+            for (int i = 0; i < values.size(); i++) {
+                stm.setObject(i + 1, values.get(i));
             }
 
             stm.executeUpdate();
             System.out.println("更新完了！");
 
-        }catch(java.sql.SQLException e){
+        } catch (java.sql.SQLException e) {
             e.printStackTrace();
             System.out.println("更新に失敗しました");
         }
     }
 
+    // idに合う案件を表示する
     public Project findById(int id) {
-    String sql = "SELECT * FROM projects WHERE id = ?";
-    
-    try (Connection conn = Database.getConnection();
-         PreparedStatement pstmt = conn.prepareStatement(sql)) {
-        
-        pstmt.setInt(1, id);
-        
-        try (ResultSet rs = pstmt.executeQuery()) {
-            if (rs.next()) {
-                // データベースのレコードを Project オブジェクトに変換する
-                return new Project(
-                    rs.getInt("id"),
-                    rs.getString("title"),
-                    rs.getString("client_name"),
-                    rs.getString("required_skill"),
-                    rs.getString("location"),
-                    rs.getInt("price_min"),
-                    rs.getInt("price_max"),
-                    rs.getString("status"),
-                    rs.getTimestamp("created_at"),
-                    rs.getTimestamp("updated_at")
-                );
+        String sql = "SELECT * FROM projects WHERE id = ?";
+
+        try (Connection conn = Database.getConnection();
+                PreparedStatement stm = conn.prepareStatement(sql)) {
+
+            stm.setInt(1, id);
+
+            try (ResultSet rs = stm.executeQuery()) {
+                if (rs.next()) {
+                    // データベースのレコードを Project オブジェクトに変換する
+                    return new Project(
+                            rs.getInt("id"),
+                            rs.getString("title"),
+                            rs.getString("client_name"),
+                            rs.getString("required_skill"),
+                            rs.getString("location"),
+                            rs.getInt("price_min"),
+                            rs.getInt("price_max"),
+                            rs.getString("status"),
+                            rs.getTimestamp("created_at"),
+                            rs.getTimestamp("updated_at"));
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    } catch (Exception e) {
-        e.printStackTrace();
+
+        // 見つからない場合は null を返す
+        return null;
     }
-    
-    // 見つからない場合は null を返す
-    return null;
-}
+
+    public boolean delete(int delete_id) {
+        String sql = "DELETE FROM projects WHERE id = ?";
+
+        try(Connection conn = Database.getConnection();
+              PreparedStatement stm = conn.prepareStatement(sql)){
+
+                stm.setInt(1, delete_id);
+
+                int affectedRows = stm.executeUpdate();
+                return affectedRows > 0;
+
+            }catch(Exception e){
+                e.printStackTrace();
+                return false;
+            }
+
+    }
 
 }
