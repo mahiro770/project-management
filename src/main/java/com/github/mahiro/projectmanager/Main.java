@@ -23,20 +23,20 @@ public class Main {
         boolean running = true;
 
         while (running) {
-            
-            System.out.println("案件配信ツールです。このまま操作を続けますか？（Y/N)");
-            System.out.print("(Y/N):");
-            String judgeString = scan.nextLine();
+            while (true) {
+                System.out.println("案件配信ツールです。このまま操作を続けますか？（Y/N)");
+                System.out.print("(Y/N):");
+                String judgeString = scan.nextLine();
 
-            if (judgeString.equals("Y") || judgeString.equals("y")) {
-                
-            } else if (judgeString.equals("N") || judgeString.equals("n")) {
-                return;
-            } else {
-                System.out.println("不正な入力です。再度入力してください");
-                continue;
+                if (judgeString.equals("Y") || judgeString.equals("y")) {
+                    break;
+                } else if (judgeString.equals("N") || judgeString.equals("n")) {
+                    return;
+                } else {
+                    System.out.println("不正な入力です。再度入力してください");
+                    continue;
+                }
             }
-        
 
             System.out.println("操作を以下より選んでください(指定の番号えらんでください)");
             System.out.println("\n==========操作方法============");
@@ -295,9 +295,10 @@ public class Main {
 
                     }
                     break;
-                    
-                default: System.out.println("不正な入力です。再度にゅうりょくしてください");
-                 break;
+
+                default:
+                    System.out.println("不正な入力です。再度にゅうりょくしてください");
+                    break;
 
             }
 
