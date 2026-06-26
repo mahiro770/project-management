@@ -3,18 +3,31 @@ package com.github.mahiro.projectmanager;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-//import java.sql.SQLClientInfoException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class ProjectRepository {
-    Scanner scan = new Scanner(System.in);
 
-    // 案件一覧表示
+    // ResultSet → Project に変換する共通メソッド
+    private Project mapProject(ResultSet rs) throws java.sql.SQLException {
+        return new Project(
+                rs.getInt("id"),
+                rs.getString("title"),
+                rs.getString("client_name"),
+                rs.getString("required_skill"),
+                rs.getString("location"),
+                rs.getInt("price_min"),
+                rs.getInt("price_max"),
+                rs.getString("status"),
+                rs.getTimestamp("created_at"),
+                rs.getTimestamp("updated_at"));
+    }
+
+    // 案件一覧取得
     public List<Project> findAll() {
-        List<Project> list = new ArrayList<Project>();
+
+        List<Project> projects = new ArrayList<>();
+
         String sql = "SELECT * FROM projects ORDER BY id";
 
         try (Connection conn = Database.getConnection();
@@ -22,70 +35,55 @@ public class ProjectRepository {
                 ResultSet rs = stm.executeQuery()) {
 
             while (rs.next()) {
-                Integer id = rs.getInt("id");
-                String title = rs.getString("title");
-                String clientName = rs.getString("client_name");
-                String requiredSkills = rs.getString("required_skill");
-                String location = rs.getString("location");
-                Integer priceMin = rs.getInt("price_min");
-                Integer priceMax = rs.getInt("price_max");
-                String status = rs.getString("status");
-                Timestamp createdAt = rs.getTimestamp("created_at");
-                Timestamp updatedAt = rs.getTimestamp("updated_at");
-
-                Project p = new Project(id, title, clientName, requiredSkills, location, priceMin, priceMax, status,
-                        createdAt, updatedAt);
-
-                list.add(p);
-
+                projects.add(mapProject(rs));
             }
+
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("案件情報を取得できませんでした");
+            System.out.println("案件一覧の取得に失敗しました。");
         }
-        return list;
+
+        return projects;
     }
 
-    // 案件詳細表示
-    public void showDetail(int select_id) {
+    // ID検索
+    public Project findById(int id) {
 
         String sql = "SELECT * FROM projects WHERE id = ?";
 
         try (Connection conn = Database.getConnection();
                 PreparedStatement stm = conn.prepareStatement(sql)) {
 
-            stm.setInt(1, select_id);
+            stm.setInt(1, id);
 
             try (ResultSet rs = stm.executeQuery()) {
 
                 if (rs.next()) {
-                    // データを取得して、表示
-                    System.out.println("ID:" + rs.getInt("id"));
-                    System.out.println("案件名:" + rs.getString("title"));
-                    System.out.println("会社名: " + rs.getString("client_name"));
-                    System.out.println("スキル: " + rs.getString("required_skill"));
-                    System.out.println("勤務地: " + rs.getString("location"));
-                    System.out.println("最低金額: " + rs.getInt("price_min"));
-                    System.out.println("最高金額: " + rs.getInt("price_max"));
-                    System.out.println("作成日時:" + rs.getTimestamp("created_at"));
-                    System.out.println("更新日時: " + rs.getTimestamp("updated_at"));
+                    return mapProject(rs);
                 }
+
             }
-        } catch (java.sql.SQLException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("データの取得中にエラーが発生しました");
+            System.out.println("案件情報の取得に失敗しました。");
         }
+
+        return null;
     }
 
-    // 案件登録
+    // 登録
     public void insert(Project project) {
-        String sql = "INSERT INTO projects (title,client_name,required_skill,location,price_min,price_max) VALUES(?,?,?,?,?,?)";
 
-        // try-with-resources でリソースを自動でクローズ
+        String sql = """
+                INSERT INTO projects
+                (title, client_name, required_skill, location, price_min, price_max)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """;
+
         try (Connection conn = Database.getConnection();
                 PreparedStatement stm = conn.prepareStatement(sql)) {
 
-            // 各値をセット
             stm.setString(1, project.getTitle());
             stm.setString(2, project.getClientName());
             stm.setString(3, project.getRequiredSkills());
@@ -104,18 +102,22 @@ public class ProjectRepository {
             }
 
             stm.executeUpdate();
-            System.out.println("登録が完了しました");
 
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("登録に失敗しました:" + e.getMessage());
+            System.out.println("案件登録に失敗しました。");
         }
-
     }
 
-    // 案件更新
-    public void update(Project project, boolean updateTitle, boolean updateClient_name, boolean updateRequired_skill,
-            boolean updateLocation, boolean updatePrice_min, boolean updatePrice_max, boolean updateStatus) {
+    // 更新
+    public void update(Project project,
+            boolean updateTitle,
+            boolean updateClientName,
+            boolean updateRequiredSkill,
+            boolean updateLocation,
+            boolean updatePriceMin,
+            boolean updatePriceMax,
+            boolean updateStatus) {
 
         List<String> setClauses = new ArrayList<>();
         List<Object> values = new ArrayList<>();
@@ -124,26 +126,32 @@ public class ProjectRepository {
             setClauses.add("title = ?");
             values.add(project.getTitle());
         }
-        if (updateClient_name) {
+
+        if (updateClientName) {
             setClauses.add("client_name = ?");
             values.add(project.getClientName());
         }
-        if (updateRequired_skill) {
+
+        if (updateRequiredSkill) {
             setClauses.add("required_skill = ?");
             values.add(project.getRequiredSkills());
         }
+
         if (updateLocation) {
             setClauses.add("location = ?");
             values.add(project.getLocation());
         }
-        if (updatePrice_min) {
+
+        if (updatePriceMin) {
             setClauses.add("price_min = ?");
             values.add(project.getPriceMin());
         }
-        if (updatePrice_max) {
+
+        if (updatePriceMax) {
             setClauses.add("price_max = ?");
             values.add(project.getPriceMax());
         }
+
         if (updateStatus) {
             setClauses.add("status = ?");
             values.add(project.getStatus());
@@ -152,14 +160,10 @@ public class ProjectRepository {
         setClauses.add("updated_at = ?");
         values.add(project.getUpdatedAt());
 
-        if (setClauses.isEmpty()) {
-            System.out.println("更新対象が選択されていません");
-            return;
-        }
-
         String sql = "UPDATE projects SET "
-                + String.join(",", setClauses)
+                + String.join(", ", setClauses)
                 + " WHERE id = ?";
+
         values.add(project.getId());
 
         try (Connection conn = Database.getConnection();
@@ -170,63 +174,30 @@ public class ProjectRepository {
             }
 
             stm.executeUpdate();
-            System.out.println("更新完了！");
 
-        } catch (java.sql.SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("更新に失敗しました");
+            System.out.println("更新に失敗しました。");
         }
     }
 
-    // idに合う案件を表示する
-    public Project findById(int id) {
-        String sql = "SELECT * FROM projects WHERE id = ?";
+    // 削除
+    public boolean delete(int id) {
+
+        String sql = "DELETE FROM projects WHERE id = ?";
 
         try (Connection conn = Database.getConnection();
                 PreparedStatement stm = conn.prepareStatement(sql)) {
 
             stm.setInt(1, id);
 
-            try (ResultSet rs = stm.executeQuery()) {
-                if (rs.next()) {
-                    // データベースのレコードを Project オブジェクトに変換する
-                    return new Project(
-                            rs.getInt("id"),
-                            rs.getString("title"),
-                            rs.getString("client_name"),
-                            rs.getString("required_skill"),
-                            rs.getString("location"),
-                            rs.getInt("price_min"),
-                            rs.getInt("price_max"),
-                            rs.getString("status"),
-                            rs.getTimestamp("created_at"),
-                            rs.getTimestamp("updated_at"));
-                }
-            }
+            return stm.executeUpdate() > 0;
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // 見つからない場合は null を返す
-        return null;
-    }
-
-    public boolean delete(int delete_id) {
-        String sql = "DELETE FROM projects WHERE id = ?";
-
-        try(Connection conn = Database.getConnection();
-              PreparedStatement stm = conn.prepareStatement(sql)){
-
-                stm.setInt(1, delete_id);
-
-                int affectedRows = stm.executeUpdate();
-                return affectedRows > 0;
-
-            }catch(Exception e){
-                e.printStackTrace();
-                return false;
-            }
-
+        return false;
     }
 
 }

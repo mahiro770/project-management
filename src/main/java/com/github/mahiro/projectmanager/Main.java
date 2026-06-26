@@ -3,13 +3,11 @@ package com.github.mahiro.projectmanager;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Scanner;
-import java.sql.Timestamp;
 
 public class Main {
 
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in, "UTF-8");
-        ProjectRepository repo = new ProjectRepository();
         ProjectService service = new ProjectService();
 
         try (Connection conn = Database.getConnection()) {
@@ -77,23 +75,41 @@ public class Main {
                         while (true) {
                             // 一覧表示は以前作った Service メソッドを活用
                             List<Project> lists = service.getProjectList();
+
                             for (Project p : lists) {
-                                System.out.println("\n" + p.toString());
+                                System.out.println("\n" + p);
                             }
 
                             System.out.println("\n詳細一覧表示を開始します（戻る場合は-1)");
                             System.out.print("詳細を表示したい案件番号を入力してください: ");
-                            int select_id = scan.nextInt();
-                            scan.nextLine(); // バッファクリア
 
-                            if (select_id == -1) {
-                                System.out.println("詳細表示をキャンセルします\n");
+                            int selectId = scan.nextInt();
+                            scan.nextLine();
+
+                            if (selectId == -1) {
+                                System.out.println("詳細表示をキャンセルします");
                                 break;
                             }
 
-                            // Serviceに詳細表示の処理を丸投げする
-                            service.showProjectDetail(select_id);
-                            System.out.println();
+                            Project project = service.getProjectDetail(selectId);
+
+                            if (project != null) {
+
+                                System.out.println("\n==========案件詳細==========");
+
+                                System.out.println("ID：" + project.getId());
+                                System.out.println("案件名：" + project.getTitle());
+                                System.out.println("会社名：" + project.getClientName());
+                                System.out.println("必須スキル：" + project.getRequiredSkills());
+                                System.out.println("勤務地：" + project.getLocation());
+                                System.out.println("最低金額：" + project.getPriceMin());
+                                System.out.println("最高金額：" + project.getPriceMax());
+                                System.out.println("配属状況：" + project.getStatus());
+                                System.out.println("作成日時：" + project.getCreatedAt());
+                                System.out.println("更新日時：" + project.getUpdatedAt());
+
+                                System.out.println("============================");
+                            }
                         }
                         break;
 
@@ -120,8 +136,8 @@ public class Main {
 
                         try {
                             // ここでServiceに判断を任せる！
-                            ProjectService servic = new ProjectService();
-                            servic.registerProject(title, client, skill, loc, min, max);
+
+                            service.registerProject(title, client, skill, loc, min, max);
                         } catch (IllegalArgumentException e) {
                             System.out.println("エラー: " + e.getMessage());
                         } catch (Exception e) {
@@ -136,7 +152,7 @@ public class Main {
 
                             System.out.println("更新処理を開始します");
 
-                            List<Project> projects = repo.findAll();
+                            List<Project> projects = service.getProjectList();
 
                             for (Project p : projects) {
                                 System.out.println();
@@ -148,7 +164,6 @@ public class Main {
                             System.out.print("番号:");
                             int change_id = scan.nextInt();
                             scan.nextLine();
-                            repo.showDetail(change_id);
 
                             if (change_id == -1) {
                                 System.out.println();
@@ -156,9 +171,21 @@ public class Main {
                                 System.out.println();
                                 break;
                             }
-
+                            Project project = service.getProjectDetail(change_id);
+                            if (project == null) {
+                                break;
+                            }
                             System.out.println("\n==========案件一覧===========");
-                            repo.findById(change_id);
+                            System.out.println("ID：" + project.getId());
+                            System.out.println("案件名：" + project.getTitle());
+                            System.out.println("会社名：" + project.getClientName());
+                            System.out.println("必須スキル：" + project.getRequiredSkills());
+                            System.out.println("勤務地：" + project.getLocation());
+                            System.out.println("最低金額：" + project.getPriceMin());
+                            System.out.println("最高金額：" + project.getPriceMax());
+                            System.out.println("配属状況：" + project.getStatus());
+                            System.out.println("作成日時：" + project.getCreatedAt());
+                            System.out.println("更新日時：" + project.getUpdatedAt());
                             System.out.println("\n============================");
                             System.out.println();
 
@@ -222,6 +249,7 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("データベースにつながっていません");
+        } finally{
             scan.close();
         }
 

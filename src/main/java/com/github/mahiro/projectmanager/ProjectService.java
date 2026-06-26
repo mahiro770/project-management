@@ -1,114 +1,151 @@
 package com.github.mahiro.projectmanager;
-import java.util.List;
+
 import java.sql.Timestamp;
+import java.util.List;
 
 public class ProjectService {
-    private ProjectRepository repo = new ProjectRepository();
 
-    // 案件一覧を取得するメソッドcase1
+    private final ProjectRepository repo = new ProjectRepository();
+
+    // 案件一覧取得
     public List<Project> getProjectList() {
-        // ここに将来的に「検索条件」や「並び替え」などのロジックを追加可能
         return repo.findAll();
     }
 
-    //案件詳細表示するメソッドcase2
-   public void showProjectDetail(int id) {
-    // 入力値自体が不正な場合のチェック
-    if (id <= 0) {
-        System.out.println("エラー: 案件番号は1以上の正の整数を入力してください。");
-        return;
+    // 案件詳細取得
+    public Project getProjectDetail(int id) {
+
+        if (id <= 0) {
+            System.out.println("案件番号は1以上を入力してください。");
+            return null;
+        }
+
+        Project project = repo.findById(id);
+
+        if (project == null) {
+            System.out.println("該当する案件が存在しません。");
+        }
+
+        return project;
     }
-    
-    Project project = repo.findById(id);
-    if (project == null) {
-        System.out.println("エラー: 該当する案件が見つかりません。");
-        return;
-    }
 
-    repo.showDetail(id);
-}
+    // 案件登録
+    public void registerProject(String title,
+                                String clientName,
+                                String skills,
+                                String location,
+                                String min,
+                                String max) {
 
-
-    // 登録前のバリデーションと登録実行を担当case3
-    public void registerProject(String title, String clientName, String skills, 
-                                String location, String min, String max) {
-        
-        // 必須チェック（もし空なら例外を投げてMainに伝える）
-        if (title == null || title.isEmpty()) {
+        if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("タイトルは必須です。");
         }
-        if (clientName == null || clientName.isEmpty()) {
+
+        if (clientName == null || clientName.isBlank()) {
             throw new IllegalArgumentException("会社名は必須です。");
         }
 
-        // 数値変換（例外処理をここに集約）
-        Integer priceMin = (min.isEmpty()) ? null : Integer.parseInt(min);
-        Integer priceMax = (max.isEmpty()) ? null : Integer.parseInt(max);
+        Integer priceMin = min.isBlank() ? null : Integer.parseInt(min);
+        Integer priceMax = max.isBlank() ? null : Integer.parseInt(max);
 
-        // データベースへの登録
-        Project newProject = new Project(null, title, clientName, skills, location, 
-                                         priceMin, priceMax, null, null, null);
-        repo.insert(newProject);
-        System.out.println("案件の登録が完了しました！");
+        Project project = new Project(
+                null,
+                title,
+                clientName,
+                skills,
+                location,
+                priceMin,
+                priceMax,
+                "OPEN",
+                null,
+                null);
+
+        repo.insert(project);
+
+        System.out.println("案件を登録しました。");
     }
 
-    public void updateProject(int id, String newTitle, String newClientName, 
-                          String newSkills, String newLocation, 
-                          String inputPriceMin, String inputPriceMax, String newStatus) {
-    
-    // 1. 存在チェック
-    Project project = repo.findById(id);
-    if (project == null) {
-        System.out.println("エラー: ID " + id + " の案件は見つかりません。");
-        return;
+    // 案件更新
+    public void updateProject(int id,
+                              String newTitle,
+                              String newClientName,
+                              String newSkills,
+                              String newLocation,
+                              String inputPriceMin,
+                              String inputPriceMax,
+                              String newStatus) {
+
+        Project project = repo.findById(id);
+
+        if (project == null) {
+            System.out.println("案件が存在しません。");
+            return;
+        }
+
+        boolean updateTitle = !newTitle.isBlank();
+        if (updateTitle) {
+            project.setTitle(newTitle);
+        }
+
+        boolean updateClientName = !newClientName.isBlank();
+        if (updateClientName) {
+            project.setClientName(newClientName);
+        }
+
+        boolean updateSkills = !newSkills.isBlank();
+        if (updateSkills) {
+            project.setRequiredSkills(newSkills);
+        }
+
+        boolean updateLocation = !newLocation.isBlank();
+        if (updateLocation) {
+            project.setLocation(newLocation);
+        }
+
+        boolean updatePriceMin = !inputPriceMin.isBlank();
+        if (updatePriceMin) {
+            project.setPriceMin(Integer.parseInt(inputPriceMin));
+        }
+
+        boolean updatePriceMax = !inputPriceMax.isBlank();
+        if (updatePriceMax) {
+            project.setPriceMax(Integer.parseInt(inputPriceMax));
+        }
+
+        boolean updateStatus = !newStatus.isBlank();
+        if (updateStatus) {
+            project.setStatus(newStatus);
+        }
+
+        project.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+
+        repo.update(
+                project,
+                updateTitle,
+                updateClientName,
+                updateSkills,
+                updateLocation,
+                updatePriceMin,
+                updatePriceMax,
+                updateStatus);
+
+        System.out.println("更新が完了しました。");
     }
 
-    // 2. 更新フラグと値の設定
-    // --- 統一フォーマットで各項目を処理 ---
-    boolean updateTitle = !newTitle.isEmpty();
-    if (updateTitle) project.setTitle(newTitle);
+    // 案件削除
+    public void deleteProject(int id) {
 
-    boolean updateClientName = !newClientName.isEmpty();
-    if (updateClientName) project.setClientName(newClientName);
+        Project project = repo.findById(id);
 
-    boolean updateRequiredSkills = !newSkills.isEmpty();
-    if (updateRequiredSkills) project.setRequiredSkills(newSkills);
+        if (project == null) {
+            System.out.println("案件が見つかりません。");
+            return;
+        }
 
-    boolean updateLocation = !newLocation.isEmpty();
-    if (updateLocation) project.setLocation(newLocation);
-
-    boolean updatePriceMin = !inputPriceMin.isEmpty();
-    if (updatePriceMin) project.setPriceMin(Integer.parseInt(inputPriceMin));
-
-    boolean updatePriceMax = !inputPriceMax.isEmpty();
-    if (updatePriceMax) project.setPriceMax(Integer.parseInt(inputPriceMax));
-
-    boolean updateStatus = !newStatus.isEmpty();
-    if (updateStatus) project.setStatus(newStatus);
-
-    // 最後にDB更新を実行
-    project.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
-    repo.update(project, updateTitle, updateClientName, updateRequiredSkills, 
-                updateLocation, updatePriceMin, updatePriceMax, updateStatus);
-    
-    System.out.println("更新が完了しました！");
-}
-
-// ProjectService.java に追加
-public void deleteProject(int id) {
-    // 存在チェック
-    Project project = repo.findById(id);
-    if (project == null) {
-        System.out.println("指定された案件（ID: " + id + "）は見つかりませんでした。");
-        System.out.println("一覧表示でIDを確認してください。");
-        return;
+        if (repo.delete(id)) {
+            System.out.println("削除が完了しました。");
+        } else {
+            System.out.println("削除に失敗しました。");
+        }
     }
-
-    // 削除実行
-    if (repo.delete(id)) {
-        System.out.println("削除が完了しました。");
-    } else {
-        System.out.println("削除中にエラーが発生しました。");
-    }
-}
 }

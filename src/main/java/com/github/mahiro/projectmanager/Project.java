@@ -54,17 +54,16 @@ public void setUpdatedAt(Timestamp updatedAt){this.updatedAt = updatedAt;}
 
 @Override
 public String toString(){
-    return 
-    "Id:" + this.id +" | "+
-    "案件名:" + this.title +" | "+
-    "会社名:" + this.clientName +" | "+
-    "必須スキル:" + this.requiredSkills +" | "+
-    "勤務地:" + this.location +" | "+
-    "最低金額ー最高金額:" + this.priceMin + " - " + this.priceMax +" | "+
-    "配属状況:" + this.status +" | "+
-    "取得日時:" + this.createdAt +" | "+
-    "更新日時:" + this.updatedAt;    
-}
+    return "Id:" + id
+                + " | 案件名:" + title
+                + " | 会社名:" + clientName
+                + " | 必須スキル:" + requiredSkills
+                + " | 勤務地:" + location
+                + " | 最低金額-最高金額:" + priceMin + " - " + priceMax
+                + " | 配属状況:" + status
+                + " | 取得日時:" + createdAt
+                + " | 更新日時:" + updatedAt;
+    }
 
 }
 
