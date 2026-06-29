@@ -1,0 +1,5 @@
+com\github\mahiro\projectmanager\Database.class
+com\github\mahiro\projectmanager\Main.class
+com\github\mahiro\projectmanager\ProjectRepository.class
+com\github\mahiro\projectmanager\ProjectService.class
+com\github\mahiro\projectmanager\Project.class
