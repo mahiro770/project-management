@@ -17,6 +17,8 @@ public class Project {
 
 
 //コンストラクタ
+public Project() {}
+
 public  Project(Integer id,String title, String clientName, String requiredSkills, String location, Integer priceMin, Integer priceMax, String status,Timestamp createdAt,Timestamp updatedAt){
     this.id = id;
     this.title = title;
