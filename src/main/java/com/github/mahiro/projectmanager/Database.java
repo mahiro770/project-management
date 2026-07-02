@@ -9,6 +9,17 @@ public class Database{
     private static final String USER = "postgres";
     private static final String PASSWORD = "postgres";
 
+    // ドライバをこのクラスのクラスローダーで明示的にロードしておく。
+    // HttpServerのディスパッチャスレッドなどcontext classloaderが異なるスレッドから
+    // 呼ばれてもDriverManagerが解決できるようにするため（ServiceLoaderの自動検出に頼らない）。
+    static {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
     //インスタンス化防止
     private Database(){
 

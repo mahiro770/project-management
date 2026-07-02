@@ -16,21 +16,20 @@ public class ProjectService {
     public Project getProjectDetail(int id) {
 
         if (id <= 0) {
-            System.out.println("案件番号は1以上を入力してください。");
-            return null;
+            throw new IllegalArgumentException("案件番号は1以上を入力してください。");
         }
 
         Project project = repo.findById(id);
 
         if (project == null) {
-            System.out.println("該当する案件が存在しません。");
+            throw new ProjectNotFoundException(id);
         }
 
         return project;
     }
 
-    // 案件登録
-    public void registerProject(String title,
+    // 案件登録（登録後の案件を返す）
+    public Project registerProject(String title,
                                 String clientName,
                                 String skills,
                                 String location,
@@ -45,8 +44,8 @@ public class ProjectService {
             throw new IllegalArgumentException("会社名は必須です。");
         }
 
-        Integer priceMin = min.isBlank() ? null : Integer.parseInt(min);
-        Integer priceMax = max.isBlank() ? null : Integer.parseInt(max);
+        Integer priceMin = (min == null || min.isBlank()) ? null : Integer.parseInt(min);
+        Integer priceMax = (max == null || max.isBlank()) ? null : Integer.parseInt(max);
 
         Project project = new Project(
                 null,
@@ -60,13 +59,17 @@ public class ProjectService {
                 null,
                 null);
 
-        repo.insert(project);
+        Integer generatedId = repo.insert(project);
 
-        System.out.println("案件を登録しました。");
+        if (generatedId == null) {
+            throw new IllegalStateException("案件登録に失敗しました。");
+        }
+
+        return repo.findById(generatedId);
     }
 
-    // 案件更新
-    public void updateProject(int id,
+    // 案件更新（更新後の案件を返す）
+    public Project updateProject(int id,
                               String newTitle,
                               String newClientName,
                               String newSkills,
@@ -78,8 +81,7 @@ public class ProjectService {
         Project project = repo.findById(id);
 
         if (project == null) {
-            System.out.println("案件が存在しません。");
-            return;
+            throw new ProjectNotFoundException(id);
         }
 
         boolean updateTitle = !newTitle.isBlank();
@@ -129,7 +131,7 @@ public class ProjectService {
                 updatePriceMax,
                 updateStatus);
 
-        System.out.println("更新が完了しました。");
+        return repo.findById(id);
     }
 
     // 案件削除
@@ -138,14 +140,11 @@ public class ProjectService {
         Project project = repo.findById(id);
 
         if (project == null) {
-            System.out.println("案件が見つかりません。");
-            return;
+            throw new ProjectNotFoundException(id);
         }
 
-        if (repo.delete(id)) {
-            System.out.println("削除が完了しました。");
-        } else {
-            System.out.println("削除に失敗しました。");
+        if (!repo.delete(id)) {
+            throw new IllegalStateException("削除に失敗しました。");
         }
     }
 }

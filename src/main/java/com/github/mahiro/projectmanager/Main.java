@@ -91,9 +91,8 @@ public class Main {
                                 break;
                             }
 
-                            Project project = service.getProjectDetail(selectId);
-
-                            if (project != null) {
+                            try {
+                                Project project = service.getProjectDetail(selectId);
 
                                 System.out.println("\n==========案件詳細==========");
 
@@ -109,6 +108,8 @@ public class Main {
                                 System.out.println("更新日時：" + project.getUpdatedAt());
 
                                 System.out.println("============================");
+                            } catch (IllegalArgumentException | ProjectNotFoundException e) {
+                                System.out.println("エラー: " + e.getMessage());
                             }
                         }
                         break;
@@ -135,9 +136,10 @@ public class Main {
                         String max = scan.nextLine();
 
                         try {
-                            // ここでServiceに判断を任せる！
+                            // ここでServiceに判断を任せる
 
-                            service.registerProject(title, client, skill, loc, min, max);
+                            Project registered = service.registerProject(title, client, skill, loc, min, max);
+                            System.out.println("案件を登録しました。(ID: " + registered.getId() + ")");
                         } catch (IllegalArgumentException e) {
                             System.out.println("エラー: " + e.getMessage());
                         } catch (Exception e) {
@@ -171,8 +173,11 @@ public class Main {
                                 System.out.println();
                                 break;
                             }
-                            Project project = service.getProjectDetail(change_id);
-                            if (project == null) {
+                            Project project;
+                            try {
+                                project = service.getProjectDetail(change_id);
+                            } catch (IllegalArgumentException | ProjectNotFoundException e) {
+                                System.out.println("エラー: " + e.getMessage());
                                 break;
                             }
                             System.out.println("\n==========案件一覧===========");
@@ -210,8 +215,13 @@ public class Main {
                             System.out.print("配属状況を変更してください（変更しない場合はEnter）： ");
                             String newStatus = scan.nextLine();
 
-                            service.updateProject(change_id, newTitle, newClientName, newSkills,
-                                    newLocation, inputPriceMin, inputPriceMax, newStatus);
+                            try {
+                                service.updateProject(change_id, newTitle, newClientName, newSkills,
+                                        newLocation, inputPriceMin, inputPriceMax, newStatus);
+                                System.out.println("更新が完了しました。");
+                            } catch (IllegalArgumentException | ProjectNotFoundException e) {
+                                System.out.println("エラー: " + e.getMessage());
+                            }
                             break;
                         }
                         break;
@@ -230,7 +240,12 @@ public class Main {
                         String judge = scan.nextLine();
 
                         if ("Y".equalsIgnoreCase(judge)) {
-                            service.deleteProject(delete_id); // 処理をServiceに委譲
+                            try {
+                                service.deleteProject(delete_id); // 処理をServiceに委譲
+                                System.out.println("削除が完了しました。");
+                            } catch (ProjectNotFoundException | IllegalStateException e) {
+                                System.out.println("エラー: " + e.getMessage());
+                            }
                         } else if ("N".equalsIgnoreCase(judge)) {
                             System.out.println("削除をキャンセルしました。");
                         } else {

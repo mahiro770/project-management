@@ -42,6 +42,7 @@ public String getStatus(){return this.status;}
 public Timestamp getCreatedAt(){return this.createdAt;}
 public Timestamp getUpdatedAt(){return this.updatedAt;}
 
+//セッター
 public void setTitle(String title){this.title = title;}
 public void setClientName(String clientName){this.clientName = clientName;}
 public void setRequiredSkills(String requiredSkills){this.requiredSkills = requiredSkills;}

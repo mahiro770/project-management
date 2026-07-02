@@ -72,8 +72,8 @@ public class ProjectRepository {
         return null;
     }
 
-    // 登録
-    public void insert(Project project) {
+    // 登録（生成されたIDを返す）
+    public Integer insert(Project project) {
 
         String sql = """
                 INSERT INTO projects
@@ -82,7 +82,7 @@ public class ProjectRepository {
                 """;
 
         try (Connection conn = Database.getConnection();
-                PreparedStatement stm = conn.prepareStatement(sql)) {
+                PreparedStatement stm = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
 
             stm.setString(1, project.getTitle());
             stm.setString(2, project.getClientName());
@@ -103,10 +103,18 @@ public class ProjectRepository {
 
             stm.executeUpdate();
 
+            try (ResultSet keys = stm.getGeneratedKeys()) {
+                if (keys.next()) {
+                    return keys.getInt(1);
+                }
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("案件登録に失敗しました。");
         }
+
+        return null;
     }
 
     // 更新

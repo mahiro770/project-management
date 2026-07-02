@@ -10,6 +10,7 @@
 
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
+    <exec.mainClass>com.github.mahiro.projectmanager.Main</exec.mainClass>
   </properties>
 
   <dependencies>
@@ -25,6 +26,12 @@
       <artifactId>postgresql</artifactId>
       <version>42.7.3</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20240303</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -34,7 +41,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.1.0</version>
         <configuration>
-          <mainClass>com.github.mahiro.projectmanager.Main</mainClass>
+          <mainClass>${exec.mainClass}</mainClass>
           <environmentVariables>
             <JAVA_TOOL_OPTIONS>-Dfile.encoding=UTF-8 -Dconsole.encoding=UTF-8</JAVA_TOOL_OPTIONS>
           </environmentVariables>
